@@ -9,20 +9,22 @@ target. This module therefore:
 * follows redirects manually so that *every hop* is re-validated,
 * connects to the vetted IP address (preventing DNS-rebinding between the
   check and the request) while keeping the original hostname for TLS/SNI,
-* caps the response size and total time.
+* caps the response size and the total time spent.
 """
 
 from __future__ import annotations
 
 import ipaddress
 import socket
+import time
 from typing import List
 from urllib.parse import urljoin, urlsplit
 
 import requests
 from requests.adapters import HTTPAdapter
 
-DEFAULT_TIMEOUT = 10  # seconds per request
+DEFAULT_TIMEOUT = 8  # seconds per socket operation
+TOTAL_DEADLINE = 20  # seconds for the whole fetch, redirects and body included
 MAX_REDIRECTS = 3
 MAX_BYTES = 1_000_000
 ALLOWED_PORTS = {80, 443}
@@ -102,8 +104,11 @@ def fetch_url(url: str, allow_private: bool = False, timeout: int = DEFAULT_TIME
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     current = url
+    deadline = time.monotonic() + TOTAL_DEADLINE
     try:
         for _ in range(MAX_REDIRECTS + 1):
+            if time.monotonic() > deadline:
+                raise FetchError("The remote server took too long to respond.")
             current = validate_url(current, allow_private)
             parts = urlsplit(current)
             request_url, headers = current, {}
@@ -135,6 +140,8 @@ def fetch_url(url: str, allow_private: bool = False, timeout: int = DEFAULT_TIME
                     raise FetchError(f"The remote server answered with HTTP {resp.status_code}.")
                 chunks, size = [], 0
                 for chunk in resp.iter_content(chunk_size=16384):
+                    if time.monotonic() > deadline:
+                        raise FetchError("The remote server took too long to respond.")
                     size += len(chunk)
                     if size > MAX_BYTES:
                         raise FetchError(f"The page is larger than {MAX_BYTES:,} bytes.")

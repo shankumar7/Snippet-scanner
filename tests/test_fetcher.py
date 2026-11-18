@@ -184,3 +184,9 @@ def test_https_pinned_ip_still_verifies_hostname(tmp_path, monkeypatch):
             fetch_url(f"https://other.test:{port}/")
     finally:
         srv.shutdown()
+
+
+def test_total_deadline_enforced(server, monkeypatch):
+    monkeypatch.setattr(fetcher, "TOTAL_DEADLINE", -1)
+    with pytest.raises(FetchError, match="too long"):
+        fetch_url(server + "/", allow_private=True)

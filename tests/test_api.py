@@ -91,3 +91,8 @@ def test_cors_header(client):
 def test_serves_frontend(client):
     r = client.get("/")
     assert r.status_code == 200 and b"Snippet" in r.data
+
+
+def test_serves_stylesheet(client):
+    r = client.get("/tailwind.css")
+    assert r.status_code == 200 and r.mimetype == "text/css"

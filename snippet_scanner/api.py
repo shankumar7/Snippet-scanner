@@ -103,6 +103,10 @@ def create_app(config: Optional[dict] = None) -> Flask:
         def index():
             return send_from_directory(FRONTEND_DIR, "index.html")
 
+        @app.get("/tailwind.css")
+        def stylesheet():
+            return send_from_directory(FRONTEND_DIR, "tailwind.css")
+
     # ---------------------------------------------------------------- errors
     @app.errorhandler(HTTPException)
     def http_error(exc: HTTPException):

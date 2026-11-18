@@ -1,0 +1,12 @@
+{
+  "name": "snippet-scanner-frontend",
+  "private": true,
+  "description": "Build tooling for the Snippet Scanner frontend stylesheet (the app itself needs no JS build).",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i frontend/tailwind.input.css -o frontend/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  },
+  "license": "MIT"
+}
