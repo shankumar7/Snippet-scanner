@@ -1,9 +1,17 @@
 services:
   - type: web
-    name: flask-owasp-scanner
-    env: python
-    buildCommand: ""
-    startCommand: "python app.py"
+    name: snippet-scanner
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 30
+    healthCheckPath: /health
     envVars:
-      - key: FLASK_ENV
-        value: production
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      # Comma-separated list of allowed origins. "*" is fine for a public, stateless API.
+      - key: CORS_ORIGINS
+        value: "*"
+      # The hosted API must never fetch private/internal addresses.
+      - key: ALLOW_PRIVATE_URLS
+        value: "false"
