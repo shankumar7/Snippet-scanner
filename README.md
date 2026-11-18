@@ -85,7 +85,7 @@ curl -s -X POST http://127.0.0.1:5050/scan \
 ## How it works
 
 ```
- Browser (frontend/index.html)
+ Browser (index.html)
         │  POST /scan  {"code_snippet": "..."}  or  {"url": "https://..."}
         ▼
  ┌─────────────────────────── Flask app (snippet_scanner/api.py) ───────────────────────────┐
@@ -140,10 +140,9 @@ Snippet-scanner/
 │   ├── rules.py              #   Declarative OWASP rule catalogue (add new checks here)
 │   ├── models.py             #   Rule / Finding dataclasses, OWASP categories & severities
 │   └── fetcher.py            #   SSRF-safe URL downloader
-├── frontend/
-│   ├── index.html            # Single-page UI (vanilla JS)
-│   ├── tailwind.css          # Precompiled stylesheet (generated, committed)
-│   └── tailwind.input.css    # Tailwind entry file used to build tailwind.css
+├── index.html                # Single-page UI (vanilla JS), served at `/` and by static hosts
+├── tailwind.css              # Precompiled stylesheet (generated, committed)
+├── tailwind.input.css        # Tailwind entry file used to build tailwind.css
 ├── tests/                    # pytest suite: rules, API, fetcher
 ├── .github/workflows/ci.yml  # Runs the tests on Python 3.10–3.13
 ├── render.yaml               # Render.com deployment blueprint
@@ -214,7 +213,7 @@ All settings are optional environment variables.
 | `HOST`               | `127.0.0.1` | Bind address for `python app.py`.                                                    |
 | `CORS_ORIGINS`       | `*`         | Comma-separated list of origins allowed to call the API from a browser.              |
 | `ALLOW_PRIVATE_URLS` | `false`     | Allow URL scans of private/loopback addresses. **Local development only.**           |
-| `SERVE_FRONTEND`     | `true`      | Serve `frontend/` at `/`. Set `false` for an API-only deployment.                    |
+| `SERVE_FRONTEND`     | `true`      | Serve `index.html` at `/`. Set `false` for an API-only deployment.                    |
 
 **Pointing the frontend at a different backend.** The page picks its API automatically (same origin when served by
 Flask, `http://127.0.0.1:5050` when opened from a file, the hosted API otherwise). To override, define
@@ -301,10 +300,10 @@ npm run build:css
 `gunicorn app:app`, and uses `/health` as the health check. Create a new *Blueprint* service from this repository.
 Any host that can run `gunicorn app:app --bind 0.0.0.0:$PORT` works the same way.
 
-**Frontend (static hosting):** the UI is a static folder. To host it separately (Cloudflare Pages, GitHub Pages,
-Netlify), publish the **`frontend/`** directory (for Cloudflare Pages: *build command* empty, *build output
-directory* `frontend`). It calls the hosted API by default; see [Configuration](#configuration) to point it elsewhere.
-You can also skip separate hosting entirely, since the backend serves the UI at `/`.
+**Frontend (static hosting):** the UI is just `index.html` + `tailwind.css` at the repository root, so Cloudflare
+Pages, GitHub Pages or Netlify can serve the repo as-is (no build command, root as the output directory). It calls
+the hosted API by default; see [Configuration](#configuration) to point it elsewhere. You can also skip separate
+hosting entirely, since the backend serves the UI at `/`.
 
 ## Limitations
 

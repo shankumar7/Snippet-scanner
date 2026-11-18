@@ -18,7 +18,7 @@ from .scanner import FILE_CHECKS, ContentTooLargeError, scan_content, summarize
 
 log = logging.getLogger("snippet_scanner")
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).resolve().parent.parent  # repo root: index.html + tailwind.css
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -37,7 +37,7 @@ def create_app(config: Optional[dict] = None) -> Flask:
     ``CORS_ORIGINS``         comma-separated allowed origins (default ``*``)
     ``ALLOW_PRIVATE_URLS``   set to ``true`` to let the URL scanner reach
                              private/loopback addresses (local dev only!)
-    ``SERVE_FRONTEND``       serve ``frontend/`` at ``/`` (default ``true``)
+    ``SERVE_FRONTEND``       serve ``index.html`` at ``/`` (default ``true``)
     """
     app = Flask(__name__)
     app.config.update(
